@@ -1,0 +1,25 @@
+@keyframes revealGlow {
+        0% {
+          box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+        }
+        50% {
+          box-shadow: 0 0 60px rgba(255, 215, 0, 1);
+        }
+        100% {
+          box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+        }
+      }
+      
+      
+      
+      .revealed-card {
+        animation: revealGlow 3s infinite;
+        transition: transform 0.8s ease;
+        transform-style: preserve-3d;
+        position: relative;
+      }
+
+      .revealed-card:hover {
+        animation: revealGlow 1.5s infinite;
+        transform: translateY(-15px) scale(1.05) !important;
+      }

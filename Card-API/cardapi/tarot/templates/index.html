@@ -1,0 +1,2423 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tarot Card Reading with Forms</title>
+    <!-- <link rel="stylesheet" href="spiral-animation.css" />
+    <link rel="stylesheet" href="triangle-animation.css" /> -->
+    <style>
+      body {
+        background-color: #0a0310;
+        background-image: radial-gradient(
+          circle at center,
+          #12073f 0%,
+          #0a0310 100%
+        );
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center; /* Added for vertical centering */
+        min-height: 100vh;
+        font-family: Arial, sans-serif;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .cosmic-background {
+        background: linear-gradient(-45deg, #3b1f67, #2a1452, #1a0a33, #4b2980);
+        background-size: 400% 400%;
+        animation: mysticalBackground 15s ease infinite;
+      }
+
+      @keyframes mysticalBackground {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      .tarot-area {
+        position: relative;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        padding: 50px 0;
+        height: 600px;
+      }
+
+      .cards-container {
+        position: relative;
+        width: 1200px;
+        height: 600px;
+        margin-top: 20px;
+      }
+
+      .card {
+        position: absolute;
+        width: 100px;
+        height: 150px;
+        background-color: #2a1452;
+        background-image: linear-gradient(
+          135deg,
+          #341c5f 0%,
+          #2a1452 50%,
+          #24114a 100%
+        );
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        border-radius: 0px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4),
+          0 0 5px rgba(255, 215, 0, 0.2);
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.2, 0.85, 0.4, 1);
+        transform-origin: center center;
+        backface-visibility: hidden;
+      }
+
+      /* Logo styling */
+      .logo {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        font-size: 36px;
+        font-family: "Arial", sans-serif;
+        color: white;
+        letter-spacing: 2px;
+        text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+      }
+
+      .logo-icon {
+        display: block;
+        width: 40px;
+        height: 40px;
+        margin: 10px auto;
+        opacity: 0.9;
+      }
+
+      .card::before {
+        content: "";
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        right: 3px;
+        bottom: 3px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 0px;
+        pointer-events: none;
+      }
+
+      .card::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.1) 0%,
+          rgba(255, 255, 255, 0.05) 20%,
+          rgba(255, 255, 255, 0) 50%
+        );
+        border-radius: 0px;
+        pointer-events: none;
+      }
+
+      .card.visible {
+        opacity: 1;
+        transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+      }
+
+      .card.drawn {
+        transform: translate(var(--final-x), calc(var(--final-y) + 20px))
+          rotate(var(--rotation)) !important;
+
+        filter: brightness(1.3);
+        transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1) 3s !important; /* Added !important to transition */
+      }
+
+      .card:hover:not(.drawn) {
+  transform: translate(var(--final-x), calc(var(--final-y) + 5px)) rotate(var(--rotation)) scale(1.05) !important;
+  filter: brightness(1.15);
+  transition: all 0.3s ease;
+}
+
+
+      .card-pattern {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 0px;
+        overflow: hidden;
+        background-image: radial-gradient(
+            circle,
+            rgba(255, 215, 0, 0.05) 1px,
+            transparent 2px
+          ),
+          linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.03) 0%,
+            transparent 50%,
+            rgba(0, 0, 0, 0.1) 100%
+          );
+        background-size: 12px 12px, 100% 100%;
+      }
+
+      .card-content {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .card-heart {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 60px;
+        height: 60px;
+        opacity: 0.7;
+      }
+
+      .card-circle {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 70px;
+        height: 70px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        opacity: 0.6;
+      }
+
+      .card-grid {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 80px;
+        height: 80px;
+        opacity: 0.2;
+      }
+
+      .moon-phases {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        font-size: 10px;
+        color: rgba(255, 215, 0, 0.7);
+        letter-spacing: 2px;
+      }
+
+      .small-hearts {
+        position: absolute;
+        font-size: 8px;
+        color: rgba(255, 215, 0, 0.6);
+      }
+
+      .arrow {
+        position: absolute;
+        width: 40px;
+        height: 1px;
+        background: rgba(255, 215, 0, 0.5);
+        transform-origin: center left;
+      }
+
+      .arrow:after {
+        content: "";
+        position: absolute;
+        right: 0;
+        top: -2px;
+        width: 0;
+        height: 0;
+        border-left: 5px solid rgba(255, 215, 0, 0.5);
+        border-top: 2px solid transparent;
+        border-bottom: 2px solid transparent;
+      }
+
+      .star-burst {
+        position: absolute;
+        transition: transform 1s ease;
+      }
+
+      .star {
+        position: absolute;
+        color: rgba(255, 215, 0, 0.7);
+        font-size: 12px;
+        filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.3));
+        transform: rotate(0deg);
+        transition: transform 0.5s ease;
+      }
+
+      .celestial {
+        position: absolute;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 20px;
+        filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.5));
+        transform-origin: center center;
+        animation: glow 3s infinite alternate;
+      }
+
+      @keyframes glow {
+        from {
+          filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.3));
+        }
+        to {
+          filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.7));
+        }
+      }
+
+      /* Enhanced Spinning Card Animation */
+      .intro-card-container {
+        position: fixed; /* Changed for centering */
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%); /* Centering trick */
+        width: 200px;
+        height: 300px;
+        /* margin: 120px auto 30px; */ /* Removed margin */
+        perspective: 1200px;
+        z-index: 2000; /* Ensure it's on top */
+        opacity: 1;
+        transition: opacity 0.5s ease-out;
+      }
+
+      .intro-card {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        transform-style: preserve-3d;
+        animation: introCardRotation 20s infinite ease-in-out;
+        cursor: pointer;
+        box-shadow: 0 0 30px rgba(255, 255, 255, 0.6);
+        transform: rotateX(5deg);
+        will-change: transform; /* Added for performance */
+      }
+
+      @keyframes introCardRotation {
+        0% {
+          transform: rotateY(0) rotateX(5deg) translateZ(0);
+        }
+        25% {
+          transform: rotateY(90deg) rotateX(10deg) translateZ(20px);
+        }
+        50% {
+          transform: rotateY(180deg) rotateX(5deg) translateZ(0);
+        }
+        75% {
+          transform: rotateY(270deg) rotateX(10deg) translateZ(20px);
+        }
+        100% {
+          transform: rotateY(360deg) rotateX(5deg) translateZ(0);
+        }
+      }
+
+      /* Removed .intro-card:hover to prevent pausing animation */
+
+      .intro-card-face {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        border-radius: 0px;
+        box-shadow: 0 0 20px rgba(248, 247, 243, 0.5);
+        overflow: hidden;
+        transition: all 0.5s ease;
+        will-change: transform; /* Added for performance */
+      }
+
+      .intro-card-front {
+        background: linear-gradient(135deg, #341c5f 0%, #1a0a33 100%);
+        border: 0px solid rgba(255, 255, 255, 0.7);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .intro-card-back {
+        background: linear-gradient(135deg, #1a0a33 0%, #12073f 100%);
+        border: 2px solid rgba(255, 255, 255, 0.7);
+        transform: rotateY(180deg);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .intro-card-front::before,
+      .intro-card-back::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(
+          circle at center,
+          rgba(255, 255, 255, 0.2) 0%,
+          transparent 70%
+        );
+        pointer-events: none;
+      }
+
+      .intro-card-symbol {
+        font-size: 60px;
+        color: rgba(255, 215, 0, 0.9);
+        text-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+        margin-bottom: 20px;
+        animation: symbolGlow 3s infinite alternate;
+      }
+
+      .back-symbol {
+        font-size: 70px;
+        transform: rotate(180deg);
+      }
+
+
+      .intro-card-title {
+        font-size: 22px;
+        color: white;
+        text-align: center;
+        text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+        letter-spacing: 2px;
+        margin: 0;
+        padding: 0 15px;
+      }
+
+      .intro-card-pattern {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.3;
+        background-image: radial-gradient(
+            circle at 50% 30%,
+            rgba(255, 215, 0, 0.2) 0%,
+            transparent 50%
+          ),
+          linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.4) 100%);
+      }
+
+      /* Enhanced cosmic backgrounds */
+      body {
+        overflow-x: hidden;
+      }
+
+      /* Pulsing stars */
+      .pulsing-star {
+        position: absolute;
+        background-color: white;
+        border-radius: 50%;
+        filter: blur(0.5px);
+        opacity: 0;
+        z-index: 0;
+        animation: pulseAnimation var(--pulse-duration) infinite ease-in-out;
+        animation-delay: var(--pulse-delay);
+      }
+
+      @keyframes pulseAnimation {
+        0% {
+          transform: scale(0.1);
+          opacity: 0;
+        }
+        50% {
+          transform: scale(1);
+          opacity: var(--star-brightness);
+        }
+        100% {
+          transform: scale(0.1);
+          opacity: 0;
+        }
+      }
+
+      /* Shooting stars effect */
+      .shooting-star {
+        position: absolute;
+        height: 2px;
+        background: linear-gradient(
+          to right,
+          rgba(255, 255, 255, 0) 0%,
+          rgba(255, 255, 255, 0.8) 50%,
+          rgba(255, 255, 255, 0) 100%
+        );
+        animation: shootingStarAnimation var(--shooting-duration) linear
+          forwards;
+        opacity: 0;
+        z-index: 1;
+        transform-origin: left center;
+        box-shadow: 0 0 5px 1px rgba(255, 255, 255, 0.7);
+      }
+
+      @keyframes shootingStarAnimation {
+        0% {
+          opacity: 0;
+          transform: translateX(0) translateY(0) rotate(var(--angle)) scale(0.5);
+        }
+        5% {
+          opacity: 1;
+          transform: translateX(calc(var(--travel-distance) * 0.05))
+            translateY(calc(var(--travel-height) * 0.05)) rotate(var(--angle))
+            scale(0.5);
+        }
+        90% {
+          opacity: 1;
+          transform: translateX(calc(var(--travel-distance) * 0.9))
+            translateY(calc(var(--travel-height) * 0.9)) rotate(var(--angle))
+            scale(1);
+        }
+        100% {
+          opacity: 0;
+          transform: translateX(var(--travel-distance))
+            translateY(var(--travel-height)) rotate(var(--angle)) scale(1);
+        }
+      }
+
+      /* Twinkling stars */
+      .twinkling-star {
+        position: absolute;
+        border-radius: 50%;
+        background-color: white;
+        animation: twinkle var(--twinkle-duration) infinite ease-in-out;
+        animation-delay: var(--twinkle-delay);
+        z-index: 0;
+      }
+
+      @keyframes twinkle {
+        0%,
+        100% {
+          opacity: 0.1;
+        }
+        50% {
+          opacity: var(--star-brightness);
+        }
+      }
+
+      .start-button {
+        padding: 15px 40px;
+        background: linear-gradient(
+          to bottom,
+          rgba(255, 215, 0, 0.3) 0%,
+          rgba(184, 134, 11, 0.3) 100%
+        );
+        border: 1px solid gold;
+        color: white;
+        border-radius: 30px;
+        cursor: pointer;
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 40px;
+        transition: all 0.3s ease;
+        z-index: 30;
+        letter-spacing: 1px;
+        text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+      }
+
+      .start-button:hover {
+        background: linear-gradient(
+          to bottom,
+          rgba(255, 215, 0, 0.5) 0%,
+          rgba(184, 134, 11, 0.5) 100%
+        );
+        box-shadow: 0 0 25px rgba(255, 215, 0, 0.6);
+        transform: translateY(-3px);
+      }
+
+      /* Forms styles */
+      .forms-section {
+        width: 100%;
+        padding: 0;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1000;
+      }
+
+      .form-container {
+        display: none;
+        background-color: rgba(0, 0, 0, 0.9);
+        border: 2px solid gold;
+        border-radius: 15px;
+        padding: 30px;
+        max-width: 500px;
+        margin: 0 auto;
+        color: white;
+        text-align: center;
+        box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+        position: relative;
+        z-index: 100;
+        animation: formAppear 0.5s ease-out;
+      }
+
+      /* Style for radio options */
+      .radio-option {
+        background-color: rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+      }
+
+      .radio-option:hover {
+        background-color: rgba(255, 215, 0, 0.05);
+      }
+
+      /* Ensure no text shows behind forms */
+      .form-container::before {
+        content: "";
+        position: absolute;
+        top: -10px;
+        left: -10px;
+        right: -10px;
+        bottom: -10px;
+        background-color: rgba(0, 0, 0, 0.7);
+        border-radius: 20px;
+        z-index: -1;
+      }
+
+      @keyframes formAppear {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .form-title {
+        font-size: 24px;
+        margin-bottom: 20px;
+        color: rgba(255, 215, 0, 0.8);
+        text-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+        text-align: left;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-size: 16px;
+        color: rgba(255, 255, 255, 0.9);
+      }
+
+      .form-group input[type="text"],
+      .form-group input[type="email"],
+      .form-group input[type="date"] {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid rgba(255, 215, 0, 0.3);
+        border-radius: 8px;
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+        font-size: 16px;
+        box-sizing: border-box;
+      }
+
+      .form-group input::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+      }
+
+      .radio-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 10px;
+      }
+
+      .radio-option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .form-submit {
+        padding: 12px 30px;
+        background-color: rgba(255, 215, 0, 0.3);
+        border: 1px solid gold;
+        color: white;
+        border-radius: 25px;
+        cursor: pointer;
+        font-size: 16px;
+        margin-top: 10px;
+        transition: all 0.3s ease;
+      }
+
+      .form-submit:hover {
+        background-color: rgba(255, 215, 0, 0.5);
+        box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+      }
+
+      .form-submit:disabled {
+        background-color: rgba(100, 100, 100, 0.3);
+        border-color: rgba(200, 200, 200, 0.5);
+        cursor: not-allowed;
+      }
+
+      /* Card flipping animation */
+      @keyframes cardFlip {
+        0% {
+          transform: rotateY(0deg);
+        }
+        50% {
+          transform: rotateY(90deg);
+        }
+        100% {
+          transform: rotateY(180deg);
+        }
+      }
+
+.card.flipping {
+  animation: cardFlip 3s cubic-bezier(0.455, 0.03, 0.515, 0.955) 1 forwards;
+  transform-style: preserve-3d;
+}
+
+
+      /* Internal card sparkle animation */
+      {% comment %} @keyframes innerSparkle {
+        0% {
+          opacity: 0.3;
+          transform: scale(0.8) translate(0, 0);
+        }
+        25% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.6;
+          transform: scale(1.2) translate(5px, -5px);
+        }
+        75% {
+          opacity: 0.8;
+        }
+        100% {
+          opacity: 0.3;
+          transform: scale(0.8) translate(0, 0);
+        }
+      } {% endcomment %}
+
+      /* 3D card flipping properties */
+      .card {
+        transform-style: preserve-3d;
+        perspective: 1000px;
+      }
+
+      .card,
+.card-front,
+.revealed-card {
+  border-radius: 0px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  overflow: hidden;
+  background-clip: padding-box;
+}
+
+      .card-front,
+      .card-back {
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+        transform-style: preserve-3d;
+      }
+
+      /* Sparkling stars effect */
+      @keyframes sparkle {
+        0% {
+          opacity: 0.3;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1.5);
+        }
+        100% {
+          opacity: 0.3;
+          transform: scale(1);
+        }
+      }
+
+      .sparkle {
+        position: absolute;
+        color: gold;
+        pointer-events: none;
+        z-index: 1000;
+        animation: sparkle 1.5s ease infinite;
+      }
+
+      /* Final reveal card glow effect */
+
+
+.revealed-card {
+  animation: revealGlow 3s ease-in-out infinite;
+  border-radius: 0px;
+  transition: transform 0.6s ease, box-shadow 0.6s ease;
+}
+
+.revealed-card:hover {
+  transform: scale(1.05);
+
+              0 0 30px rgba(255, 215, 0, 0.4),
+              inset 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+           .card-face {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+        transform-style: preserve-3d;
+        border-radius: 0px;
+      }
+
+      .card-back {
+        transform: rotateY(0deg);
+        background-color: #2a1452;
+        background-image: linear-gradient(
+          135deg,
+          #341c5f 0%,
+          #2a1452 50%,
+          #24114a 100%
+        );
+      }
+
+      .card-front {
+        transform: rotateY(180deg);
+        overflow: hidden;
+        background-color: #160d30;
+        background-image: linear-gradient(135deg, #2a1452 0%, #160d30 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        box-shadow: inset 0 0 10px rgba(255, 215, 0, 0.2);
+      }
+
+      .card-flipped .card-back {
+        transform: rotateY(180deg);
+      }
+
+      .card-flipped .card-front {
+        transform: rotateY(0deg);
+      }
+
+      /* Improved tarot image styling */
+      .tarot-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center center;
+        border-radius: 8px;
+        opacity: 0;
+        transition: opacity 0.5s ease 0.7s;
+      }
+
+      .card-flipped .tarot-image {
+        opacity: 1;
+      }
+
+      /* Final message fade-in */
+      @keyframes fadeUpIn {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .final-message {
+        animation: fadeUpIn 1.5s ease-out forwards;
+      }
+
+      .triangle-animation-container {
+        position: absolute; /* Relative to .final-cards-container */
+        width: 500px; /* Effectively a point to rotate around */
+        height: 500px;
+        /* background-color: red; */
+        /* top: 50%; left: 50%; // Will be centered by flex in final-cards-container */
+        /* transform: translate(-50%, -50%); // Not needed if centered by flex */
+        z-index: 950; /* Ensure it's above other elements if needed */
+      }
+
+      .triangle-animation-container.rotating {
+        animation: triangleGroupRotation 3s linear 1; /* Rotate once for 3 seconds */
+      }
+
+      @keyframes triangleGroupRotation {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        } /* Or -360deg for opposite spin */
+      }
+
+      .final-card-in-triangle {
+        position: absolute; /* Positioned relative to .triangle-animation-container */
+        width: 100px; /* Match your .card dimensions */
+        height: 150px; /* Match your .card dimensions */
+        /* transform-origin: center center; /* Default, but good to be aware */
+        transition: transform 0.5s ease-out, opacity 0.5s ease-out; /* For later spreading */
+        z-index: 1050; /* Ensure it's above other elements if needed */
+      }
+
+      /* Adjust translateY and rotate to form the triangle */
+      /* These values might need tweaking based on desired triangle size */
+      /* MODIFIED CSS for triangle positions */
+      .final-card-in-triangle.pos-0 {
+  transform: translate(-10%, -10%) translateY(-1800px) rotate(0deg) translateX(-150px);
+}
+
+      .final-card-in-triangle.pos-1 {
+        /* Bottom-right card */
+        transform: translate(-10%, -10%) rotate(120deg) translateY(-1500px)
+          translateX(130px);
+      }
+      .final-card-in-triangle.pos-2 {
+        /* Bottom-left card */
+        transform: translate(-10%, -10%) rotate(240deg) translateY(-1100px)
+          translateX(-100px);
+      }
+      /* Styles for spreading out after rotation */
+      .final-card-spread {
+        position: relative !important; /* Override absolute for flex layout */
+        transform: translate(0px, 0px) scale(1) rotateZ(0deg) !important; /* Reset triangle transforms */
+        margin: 0 10px !important; /* Spacing from your original .final-cards-container */
+        opacity: 1 !important;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- No logo here anymore -->
+
+    <div class="intro-card-container" id="introCardContainer">
+      <div class="intro-card">
+        <div class="intro-card-face intro-card-front">
+          <div class="intro-card-pattern"></div>
+          <div class="intro-card-symbol">🔮</div>
+          <h2 class="intro-card-title">Mystic Visions</h2>
+        </div>
+        <div class="intro-card-face intro-card-back">
+          <div class="intro-card-pattern"></div>
+          <div class="intro-card-symbol back-symbol">✨</div>
+          <h2 class="intro-card-title">Unveil Your Destiny</h2>
+        </div>
+      </div>
+    </div>
+
+    <div class="tarot-area">
+      <div class="cards-container" id="cardsContainer"></div>
+
+      <button class="start-button" id="startButton">Begin Your Journey</button>
+    </div>
+
+    <!-- Forms section clearly below the cards -->
+    <div class="forms-section">
+      <div id="form1" class="form-container">
+        <h2 class="form-title">Card 1 Revelation</h2>
+        <p
+          style="
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 20px;
+            font-style: italic;
+            text-align: center;
+          "
+        >
+          Every reading starts with intention — tell me your name and what's on
+          your heart.
+        </p>
+        <div class="form-group">
+          <label for="name">Your Name</label>
+          <input type="text" id="name" placeholder="Enter your name" required />
+        </div>
+        <div class="form-group">
+          <label>What's on Your Mind?</label>
+          <div class="radio-group" style="margin-top: 15px">
+            <div
+              class="radio-option"
+              style="
+                padding: 10px;
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                border-radius: 8px;
+                margin-bottom: 10px;
+                cursor: pointer;
+                width: 100%;
+                transition: all 0.3s ease;
+              "
+            >
+              <input
+                type="radio"
+                id="health"
+                name="mind"
+                value="Health"
+                style="
+                  width: 20px;
+                  height: 20px;
+                  cursor: pointer;
+                  vertical-align: middle;
+                "
+              />
+              <label
+                for="health"
+                style="
+                  font-size: 17px;
+                  cursor: pointer;
+                  vertical-align: middle;
+                  margin-left: 8px;
+                "
+                >Health</label
+              >
+            </div>
+            <div
+              class="radio-option"
+              style="
+                padding: 10px;
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                border-radius: 8px;
+                margin-bottom: 10px;
+                cursor: pointer;
+                width: 100%;
+                transition: all 0.3s ease;
+              "
+            >
+              <input
+                type="radio"
+                id="wealth"
+                name="mind"
+                value="Wealth"
+                style="
+                  width: 20px;
+                  height: 20px;
+                  cursor: pointer;
+                  vertical-align: middle;
+                "
+              />
+              <label
+                for="wealth"
+                style="
+                  font-size: 17px;
+                  cursor: pointer;
+                  vertical-align: middle;
+                  margin-left: 8px;
+                "
+                >Wealth</label
+              >
+            </div>
+            <div
+              class="radio-option"
+              style="
+                padding: 10px;
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                border-radius: 8px;
+                margin-bottom: 10px;
+                cursor: pointer;
+                width: 100%;
+                transition: all 0.3s ease;
+              "
+            >
+              <input
+                type="radio"
+                id="love"
+                name="mind"
+                value="Love"
+                style="
+                  width: 20px;
+                  height: 20px;
+                  cursor: pointer;
+                  vertical-align: middle;
+                "
+              />
+              <label
+                for="love"
+                style="
+                  font-size: 17px;
+                  cursor: pointer;
+                  vertical-align: middle;
+                  margin-left: 8px;
+                "
+                >Love</label
+              >
+            </div>
+            <div
+              class="radio-option"
+              style="
+                padding: 10px;
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                border-radius: 8px;
+                margin-bottom: 10px;
+                cursor: pointer;
+                width: 100%;
+                transition: all 0.3s ease;
+              "
+            >
+              <input
+                type="radio"
+                id="happiness"
+                name="mind"
+                value="Happiness"
+                style="
+                  width: 20px;
+                  height: 20px;
+                  cursor: pointer;
+                  vertical-align: middle;
+                "
+              />
+              <label
+                for="happiness"
+                style="
+                  font-size: 17px;
+                  cursor: pointer;
+                  vertical-align: middle;
+                  margin-left: 8px;
+                "
+                >Happiness</label
+              >
+            </div>
+          </div>
+        </div>
+        <button id="submit1" class="form-submit" disabled>
+          Continue Your Journey
+        </button>
+      </div>
+
+      <div id="form2" class="form-container">
+        <h2 class="form-title">Card 2 Revelation</h2>
+        <p
+          style="
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 20px;
+            font-style: italic;
+            text-align: center;
+          "
+        >
+          Timing holds power. Your date of birth helps me tune into the right
+          moment, the right message, for you.
+        </p>
+        <div class="form-group">
+          <label for="dob">Date of Birth</label>
+          <input type="date" id="dob" required />
+        </div>
+        <button id="submit2" class="form-submit" disabled>
+          Continue Your Journey
+        </button>
+      </div>
+
+      <div id="form3" class="form-container">
+        <h2 class="form-title">Card 3 Revelation</h2>
+        <p
+          style="
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 20px;
+            font-style: italic;
+            text-align: center;
+          "
+        >
+          Almost there… Where should I send your reading? (Don't worry, no spam
+          — just your message, meant for you.)
+        </p>
+        <div class="form-group">
+          <label for="email">Your Email</label>
+          <input
+            type="email"
+            id="email"
+            placeholder="Enter your email"
+            required
+          />
+        </div>
+        <button id="submit3" class="form-submit" disabled>
+          Complete Your Reading
+        </button>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // DEBUG MODE - set to true to enable console logs and visual debugging
+        const DEBUG_MODE = true;
+
+        if (DEBUG_MODE) {
+          console.log("DEBUG MODE ACTIVE - Tarot Card Animation");
+        }
+
+        const container = document.getElementById("cardsContainer");
+        const startButton = document.getElementById("startButton");
+        const form1 = document.getElementById("form1");
+        const form2 = document.getElementById("form2");
+        const form3 = document.getElementById("form3");
+        const submit1 = document.getElementById("submit1");
+        const submit2 = document.getElementById("submit2");
+        const submit3 = document.getElementById("submit3");
+        const introCardContainer =
+          document.getElementById("introCardContainer");
+
+        // Create realistic starfield
+        function createStarfield() {
+          const body = document.body;
+          const starCount = 150; // More stars for a realistic sky
+
+          for (let i = 0; i < starCount; i++) {
+            const star = document.createElement("div");
+            star.className = "star";
+
+            // Vary star sizes - most stars are tiny
+            let size;
+            const sizeRandom = Math.random();
+            if (sizeRandom < 0.8) {
+              // 80% tiny stars
+              size = 0.5 + Math.random() * 1;
+            } else if (sizeRandom < 0.95) {
+              // 15% medium stars
+              size = 1.5 + Math.random() * 1;
+            } else {
+              // 5% bright stars
+              size = 2.5 + Math.random() * 1.5;
+            }
+
+            // Position stars randomly
+            const posX = Math.random() * window.innerWidth;
+            const posY = Math.random() * window.innerHeight;
+
+            // Vary star brightness - dim to bright
+            const brightness = 0.1 + Math.random() * 0.9;
+            const r = 200 + Math.floor(brightness * 55);
+            const g = 200 + Math.floor(brightness * 55);
+            const b = 255;
+
+            // Create a subtle twinkle effect for some stars
+            if (Math.random() > 0.7) {
+              star.style.animation = `twinkle ${
+                2 + Math.random() * 4
+              }s infinite alternate ease-in-out ${Math.random() * 5}s`;
+            }
+
+            // Set star styles
+            star.style.width = `${size}px`;
+            star.style.height = `${size}px`;
+            star.style.left = `${posX}px`;
+            star.style.top = `${posY}px`;
+            star.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+            star.style.opacity = brightness;
+
+            // Add drop shadow for brighter stars
+            if (size > 2) {
+              star.style.boxShadow = `0 0 ${size * 2}px rgba(255, 255, 255, ${
+                brightness * 0.7
+              })`;
+            }
+
+            body.appendChild(star);
+          }
+        }
+
+        // Create realistic shooting stars
+        function createShootingStars() {
+          const body = document.body;
+
+          // Create a shooting star
+          function createShootingStar() {
+            const star = document.createElement("div");
+            star.className = "shooting-star";
+
+            // Random starting position (top half of screen, full width)
+            const startX = Math.random() * window.innerWidth;
+            const startY = Math.random() * (window.innerHeight * 0.5);
+
+            // Calculate ending position (diagonal trajectory)
+            const angle = Math.PI / 4 + (Math.random() * Math.PI) / 4; // Between 45 and 90 degrees
+            const distance = Math.max(window.innerWidth, window.innerHeight);
+            const endX = startX + Math.cos(angle) * distance;
+            const endY = startY + Math.sin(angle) * distance;
+
+            // Set star properties
+            star.style.left = `${startX}px`;
+            star.style.top = `${startY}px`;
+            star.style.setProperty("--end-x", `${endX - startX}px`);
+            star.style.setProperty("--end-y", `${endY - startY}px`);
+
+            body.appendChild(star);
+
+            // Remove the star after animation completes
+            setTimeout(() => {
+              if (body.contains(star)) {
+                body.removeChild(star);
+              }
+            }, 3000);
+          }
+
+          // Create initial shooting stars
+          for (let i = 0; i < 3; i++) {
+            setTimeout(createShootingStar, i * 2000);
+          }
+
+          // Periodically create new shooting stars
+          setInterval(() => {
+            if (Math.random() > 0.5) {
+              // 50% chance
+              createShootingStar();
+            }
+          }, 4000);
+        }
+
+        // Create the starfield and shooting stars
+        createStarfield();
+        createShootingStars();
+
+        // Add twinkle animation
+        const style = document.createElement("style");
+        style.textContent = `
+                      @keyframes twinkle {
+                          0%, 100% { opacity: 0.1; }
+                          50% { opacity: 0.9; }
+                      }
+                  `;
+        document.head.appendChild(style);
+
+        // Make the whole radio option clickable
+        const radioOptions = document.querySelectorAll(".radio-option");
+        radioOptions.forEach((option) => {
+          option.addEventListener("click", function () {
+            const radio = this.querySelector('input[type="radio"]');
+            radio.checked = true;
+
+            // Visual feedback on click
+            radioOptions.forEach((opt) => {
+              opt.style.backgroundColor = "rgba(0, 0, 0, 0.2)";
+            });
+            this.style.backgroundColor = "rgba(255, 215, 0, 0.1)";
+
+            // Trigger validation
+            validateForm1();
+          });
+
+          // Hover effect
+          option.addEventListener("mouseenter", function () {
+            if (!this.querySelector('input[type="radio"]').checked) {
+              this.style.backgroundColor = "rgba(255, 215, 0, 0.05)";
+            }
+          });
+
+          option.addEventListener("mouseleave", function () {
+            if (!this.querySelector('input[type="radio"]').checked) {
+              this.style.backgroundColor = "rgba(0, 0, 0, 0.2)";
+              this.style.borderColor = "rgba(255, 215, 0, 0.3)";
+            }
+          });
+        });
+
+        // Store information about drawn cards and form states
+        let formState = {
+          form1Submitted: false,
+          form2Submitted: false,
+          form3Submitted: false,
+          currentlyFillingForm: false,
+        };
+
+        // Create the tarot cards
+        const createTarotArc = () => {
+          // This array will hold all our card elements
+          const cards = [];
+
+          // Helper function to add love-themed content to cards
+          const addLoveCardContent = (cardEl) => {
+            // Add card faces for the flip effect
+            // Back face (visible initially)
+            const cardBack = document.createElement("div");
+            cardBack.className = "card-face card-back";
+
+            const pattern = document.createElement("div");
+            pattern.className = "card-pattern";
+
+            // Add background circle (grid element)
+            const cardGrid = document.createElement("div");
+            cardGrid.className = "card-grid";
+            cardGrid.innerHTML = `
+                              <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <circle cx="40" cy="40" r="38" stroke="rgba(255, 215, 0, 0.2)" stroke-width="0.5" />
+                                  <circle cx="40" cy="40" r="25" stroke="rgba(255, 215, 0, 0.2)" stroke-width="0.5" />
+                                  <line x1="0" y1="40" x2="80" y2="40" stroke="rgba(255, 215, 0, 0.2)" stroke-width="0.5" />
+                                  <line x1="40" y1="0" x2="40" y2="80" stroke="rgba(255, 215, 0, 0.2)" stroke-width="0.5" />
+                              </svg>
+                          `;
+            pattern.appendChild(cardGrid);
+
+            // Add circle
+            const cardCircle = document.createElement("div");
+            cardCircle.className = "card-circle";
+            pattern.appendChild(cardCircle);
+
+            // Add heart
+            const heart = document.createElement("div");
+            heart.className = "card-heart";
+            heart.innerHTML = `
+                              <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M30 50C30 50 8 35 8 20C8 11 15 5 23 5C28 5 30 8 30 8C30 8 32 5 37 5C45 5 52 11 52 20C52 35 30 50 30 50Z"
+                                      fill="rgba(255, 215, 0, 0.3)" stroke="rgba(255, 215, 0, 0.7)" stroke-width="1" />
+                              </svg>
+                          `;
+            pattern.appendChild(heart);
+
+            // Add arrow through heart (random rotation)
+            const arrowRotation = Math.random() * 360;
+            const arrow = document.createElement("div");
+            arrow.className = "arrow";
+            arrow.style.top = "40px";
+            arrow.style.left = "40px";
+            arrow.style.transform = `rotate(${arrowRotation}deg)`;
+            pattern.appendChild(arrow);
+
+            // Add moon phases at top
+            const phases = document.createElement("div");
+            phases.className = "moon-phases";
+            phases.innerHTML = "○◐●◑";
+            pattern.appendChild(phases);
+
+            // Add small hearts around the edges
+            const numHearts = 4 + Math.floor(Math.random() * 3);
+            for (let i = 0; i < numHearts; i++) {
+              const smallHeart = document.createElement("div");
+              smallHeart.className = "small-hearts";
+              smallHeart.innerHTML = "♥";
+              smallHeart.style.left = `${5 + Math.random() * 90}px`;
+              smallHeart.style.top = `${5 + Math.random() * 140}px`;
+              pattern.appendChild(smallHeart);
+            }
+
+            // Add moon phases at bottom
+            const bottomPhases = document.createElement("div");
+            bottomPhases.className = "moon-phases";
+            bottomPhases.innerHTML = "○◐●◑";
+            bottomPhases.style.bottom = "8px";
+            bottomPhases.style.top = "auto";
+            bottomPhases.style.left = "8px";
+            pattern.appendChild(bottomPhases);
+
+            cardBack.appendChild(pattern);
+
+            // Front face (will show after flip)
+            const cardFront = document.createElement("div");
+            cardFront.className = "card-face card-front";
+
+            // Add a placeholder for the tarot image that will be populated later
+            const tarotImagePlaceholder = document.createElement("div");
+            tarotImagePlaceholder.className = "tarot-image-placeholder";
+            cardFront.appendChild(tarotImagePlaceholder);
+
+            // Add both faces to the card
+            cardEl.appendChild(cardBack);
+            cardEl.appendChild(cardFront);
+          };
+
+          // The main arc of cards (going from left to right)
+          const createArcCards = () => {
+            const numMainCards = 21; // Number of cards in the main arc
+
+            // Create each card in the arc
+            for (let i = 0; i < numMainCards; i++) {
+              const card = document.createElement("div");
+              card.className = "card";
+              card.dataset.cardPosition = i; // Store original position
+
+              // Calculate the angle for positioning along arc (from -1.0 to 1.0)
+              const t = (i / (numMainCards - 1)) * 2 - 1; // -1 to 1
+
+              // Calculate a proper arc with deeper curve - INVERTED for downward arc
+              // Using a quadratic function to create a parabola
+const x = 600 + t * 550;
+const y = 250 - 250 * (t * t);
+const slope = -2 * 250 * t;
+const angle = Math.atan(slope / 550) * (180 / Math.PI);
+
+
+              // Apply position and rotation
+              card.style.setProperty("--rotation", `${angle}deg`);
+
+              // Set initial transform for animation starting point
+              card.style.transform = `translate(-200%, -200%) rotate(0deg)`;
+
+              // Set final transform values (will be applied when card becomes visible)
+              // No offset adjustment - cards will be at their exact position
+              const adjustedY = y - 75; // Original Y position
+
+              card.dataset.finalX = `${x - 50}px`; // Adjust for card width
+              card.dataset.finalY = `${adjustedY}px`; // Original Y position
+              card.dataset.finalRotation = `${angle}deg`;
+
+              // Add CSS variables for use in hover and drawn states
+              card.style.setProperty("--final-x", `${x - 50}px`);
+              card.style.setProperty("--final-y", `${adjustedY}px`);
+
+              // Set z-index to make overlapping look good
+              card.style.zIndex = 10 + i;
+
+              // Store original z-index for use on hover/click
+              card.dataset.originalZIndex = 10 + i;
+
+              // Add card content with love-themed elements
+              addLoveCardContent(card);
+
+              // Add to container and our array
+              container.appendChild(card);
+              cards.push(card);
+
+              // Click behavior
+              card.addEventListener("click", function () {
+                // If currently filling a form, prevent picking another card
+                if (formState.currentlyFillingForm) {
+                  return;
+                }
+
+                // Get the card position
+                const cardPosition = this.dataset.cardPosition;
+
+                // Toggle drawn status
+                if (!this.classList.contains("drawn")) {
+                  // Check how many cards are already drawn
+                  const drawnCards = document.querySelectorAll(".card.drawn");
+                  const cardNumber = drawnCards.length;
+
+                  // Only allow drawing 3 cards total
+                  if (cardNumber >= 3) {
+                    return;
+                  }
+
+                  // This card is being drawn
+                  this.classList.add("drawn");
+                  this.dataset.readingPosition = cardNumber; // Store which reading position (0,1,2)
+
+                  // Mark that we're filling a form so no more cards can be picked
+                  formState.currentlyFillingForm = true;
+
+                  // Show appropriate form based on how many cards drawn so far
+                  setTimeout(() => {
+                    if (cardNumber === 0) {
+                      form1.style.display = "block";
+                    } else if (cardNumber === 1 && formState.form1Submitted) {
+                      form2.style.display = "block";
+                    } else if (cardNumber === 2 && formState.form2Submitted) {
+                      form3.style.display = "block";
+                    }
+                  }, 500); // 500ms delay
+                } else {
+                  // Check if this is the last card drawn
+                  const drawnCards = document.querySelectorAll(".card.drawn");
+                  const cardNumber = parseInt(this.dataset.readingPosition);
+                  const isLastCard = cardNumber === drawnCards.length - 1;
+
+                  // Only allow un-drawing the most recently drawn card
+                  if (!isLastCard) {
+                    return;
+                  }
+
+                  this.classList.remove("drawn");
+
+                  // Hide the corresponding form if it's visible and not submitted
+                  if (cardNumber === 0 && !formState.form1Submitted) {
+                    form1.style.display = "none";
+                    formState.currentlyFillingForm = false;
+                  } else if (cardNumber === 1 && !formState.form2Submitted) {
+                    form2.style.display = "none";
+                    formState.currentlyFillingForm = false;
+                  } else if (cardNumber === 2 && !formState.form3Submitted) {
+                    form3.style.display = "none";
+                    formState.currentlyFillingForm = false;
+                  }
+                }
+              });
+            }
+
+            return cards;
+          };
+
+          // Create all the cards
+          return createArcCards();
+        };
+
+        // Function to create sparkle effect throughout the screen
+        function createSparkleEffect() {
+          // Create container for sparkles
+          const sparkleContainer = document.createElement("div");
+          sparkleContainer.className = "sparkle-container";
+          sparkleContainer.style.position = "fixed";
+          sparkleContainer.style.top = "0";
+          sparkleContainer.style.left = "0";
+          sparkleContainer.style.width = "100%";
+          sparkleContainer.style.height = "100%";
+          sparkleContainer.style.pointerEvents = "none";
+          sparkleContainer.style.zIndex = "50";
+          document.body.appendChild(sparkleContainer);
+
+          // Create 50 sparkles
+          for (let i = 0; i < 50; i++) {
+            createSparkle(sparkleContainer);
+          }
+
+          // Continue adding sparkles every 300ms
+          const interval = setInterval(() => {
+            if (sparkleContainer.children.length < 100) {
+              // Limit to 100 sparkles max
+              createSparkle(sparkleContainer);
+            }
+          }, 300);
+
+          // Stop adding sparkles after 10 seconds
+          setTimeout(() => {
+            clearInterval(interval);
+          }, 10000);
+        }
+
+        function createSparkle(container) {
+          const sparkle = document.createElement("div");
+          sparkle.className = "sparkle";
+
+          // Random position
+          const x = Math.random() * window.innerWidth;
+          const y = Math.random() * window.innerHeight;
+
+          // Random size
+          const size = 5 + Math.random() * 15;
+
+          // Random symbol (star, sparkle, etc)
+          const symbols = ["✦", "✧", "✨", "⋆", "⭐", "*"];
+          const symbol = symbols[Math.floor(Math.random() * symbols.length)];
+
+          // Set styles
+          sparkle.style.left = `${x}px`;
+          sparkle.style.top = `${y}px`;
+          sparkle.style.fontSize = `${size}px`;
+          sparkle.innerHTML = symbol;
+
+          // Random animation duration
+          sparkle.style.animationDuration = `${1 + Math.random() * 3}s`;
+
+          // Random animation delay
+          sparkle.style.animationDelay = `${Math.random() * 2}s`;
+
+          // Add to container
+          container.appendChild(sparkle);
+
+          // Remove after animation completes
+          setTimeout(() => {
+            if (container.contains(sparkle)) {
+              container.removeChild(sparkle);
+            }
+          }, 5000);
+        }
+
+        // Function to perform the final animation
+        // Function to perform the final animation
+        function performFinalReveal() {
+          console.log("Starting final reveal animation"); // Used console.log
+
+          const selectedCards = Array.from(
+            document.querySelectorAll(".card.drawn")
+          );
+          console.log("Selected cards found:", selectedCards.length); // Used console.log
+
+          if (selectedCards.length === 0) {
+            console.error("No drawn cards found!");
+            return;
+          }
+
+          document.body.classList.add("cosmic-background");
+          createSparkleEffect();
+
+          const allCards = document.querySelectorAll(".card");
+          const cardsContainer = document.getElementById("cardsContainer");
+
+          const instructionsText = document.getElementById("instructions-text");
+          if (instructionsText) {
+            instructionsText.style.display = "none";
+          }
+
+          const unselectedAnimations = [];
+          allCards.forEach((card) => {
+            if (!card.classList.contains("drawn")) {
+              const direction = Math.random() > 0.5 ? 1 : -1;
+              const distance = 30 + Math.random() * 50;
+              const animation = card.animate(
+                [
+                  {
+                    transform: `translate(${
+                      card.style.getPropertyValue("--final-x") || "0px"
+                    }, ${
+                      card.style.getPropertyValue("--final-y") || "0px"
+                    }) rotate(${
+                      card.style.getPropertyValue("--rotation") || "0deg"
+                    })`,
+                    opacity: 1,
+                    filter: "brightness(1)",
+                  },
+                  {
+                    transform: `translate(calc(${
+                      card.style.getPropertyValue("--final-x") || "0px"
+                    } + ${(direction * distance) / 2}px), ${
+                      card.style.getPropertyValue("--final-y") || "0px"
+                    }) rotate(${
+                      card.style.getPropertyValue("--rotation") || "0deg"
+                    })`,
+                    opacity: 0.7,
+                    filter: "brightness(0.8)",
+                    offset: 0.4,
+                  },
+                  {
+                    transform: `translate(calc(${
+                      card.style.getPropertyValue("--final-x") || "0px"
+                    } + ${direction * distance}px), calc(${
+                      card.style.getPropertyValue("--final-y") || "0px"
+                    } + 20px)) rotate(${
+                      card.style.getPropertyValue("--rotation") || "0deg"
+                    })`,
+                    opacity: 0,
+                    filter: "brightness(0.5)",
+                  },
+                ],
+                {
+                  duration: 1000,
+                  easing: "cubic-bezier(0.4, 0, 0.2, 1)",
+                  fill: "forwards",
+                }
+              );
+              unselectedAnimations.push(
+                animation.finished.then(() => {
+                  card.style.display = "none";
+                })
+              );
+            }
+          });
+
+          Promise.all(unselectedAnimations)
+            .then(() => {
+              console.log("Unselected cards hidden."); // Used console.log
+
+              const finalContainer = document.createElement("div");
+              finalContainer.className = "final-cards-container";
+              finalContainer.style.cssText = `
+                            position: absolute;
+                            top: 0; /* Changed from 50% */
+                            left: 0;
+                            width: 100%;
+                            height: 100%;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            /* transform: translate(-50%, -50%); Removed as top/left 0 with 100% w/h and flex handles centering */
+                            z-index: 1000;
+                            /* padding: 50px; Consider if this padding is needed or affects centering */
+                            opacity: 0;
+                            perspective: 1000px;
+                            box-sizing: border-box; /* Ensure correct sizing with padding */
+                        `;
+              if (cardsContainer) {
+                cardsContainer.innerHTML = "";
+                cardsContainer.appendChild(finalContainer);
+              } else {
+                // Fallback if cardsContainer is not found, though it should be.
+                document.body.appendChild(finalContainer);
+              }
+
+              selectedCards.forEach((card, index) => {
+                const cardStyles = window.getComputedStyle(card);
+                const originalCardWidth = cardStyles.width;
+                const originalCardHeight = cardStyles.height;
+
+                card.remove(); // Remove from original document flow
+
+                card.style.cssText = `
+                                position: relative; /* Changed from absolute for initial placement in flex container */
+                                margin: 0 10px; /* Spacing for when they are in a row */
+                                width: ${originalCardWidth};
+                                height: ${originalCardHeight};
+                                transform: scale(0.8) translate(0px, 0px); /* Initial state before converge */
+                                opacity: 1; /* Make sure it's visible */
+                                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3), 0 0 10px rgba(255, 215, 0, 0.2);
+                                z-index: ${100 + index};
+                                display: block !important; /* Ensure display is correct */
+                                visibility: visible !important; /* Ensure visibility is correct */
+                            `;
+                finalContainer.appendChild(card);
+              });
+
+              finalContainer.style.transition = "opacity 0.5s ease-in-out 0.5s";
+              finalContainer.style.opacity = "1";
+
+              const shuffleAndSpinDuration = 1200;
+
+              let convergeAnimations = selectedCards.map((card, index) => {
+                return card.animate(
+                  [
+                    {
+                      transform: `scale(0.5) translateY(150px) rotateZ(${
+                        (index - 1) * 15
+                      }deg)`,
+                      opacity: 0,
+                    },
+                    {
+                      transform: `scale(0.8) translateY(0px) rotateZ(0deg)`, // Converge to center, slightly scaled
+                      opacity: 1,
+                    },
+                  ],
+                  {
+                    duration: shuffleAndSpinDuration,
+                    easing: "cubic-bezier(0.34, 1.56, 0.64, 1)",
+                    fill: "forwards",
+                    delay: index * 100,
+                  }
+                ).finished;
+              });
+
+              Promise.all(convergeAnimations)
+                .then(() => {
+                  console.log(
+                    "Cards converged. Preparing for triangle animation."
+                  ); // Used console.log
+
+                  const currentFinalContainer = document.querySelector(
+                    ".final-cards-container"
+                  ); // Re-query to ensure we have the right one
+
+                  const triangleContainer = document.createElement("div");
+                  triangleContainer.className = "triangle-animation-container";
+                  currentFinalContainer.appendChild(triangleContainer);
+
+                  selectedCards.forEach((card, index) => {
+                      triangleContainer.appendChild(card);
+                    card.style.position = "absolute";
+                    card.style.margin = "0";
+                    card.style.top = "50%";
+                    card.style.left = "50%";
+                    // This transform centers the card's origin for the triangle positioning transforms
+                    // card.style.transform = "translate(-50%, -50%)";
+
+                    card.classList.add("final-card-in-triangle");
+                    card.classList.add(`pos-${index}`);
+                    card.style.transform = `translate(${index * 10}px, ${
+                      index * 10
+                    }px)`;
+                    console.log(
+                      // Used console.log
+                      `Card ${
+                        index + 1
+                      } set for triangle, initial transform for class: ${
+                        card.style.transform
+                      }`
+                    );
+                  });
+
+                  return new Promise((resolve) => {
+                    setTimeout(() => {
+                      triangleContainer.classList.add("rotating");
+                      console.log("Triangle rotation started."); // Used console.log
+
+                      triangleContainer.addEventListener(
+                        "animationend",
+                        () => {
+                          console.log("Triangle rotation finished."); // Used console.log
+                          triangleContainer.style.animation = "none";
+                          // triangleContainer.style.transform = 'rotate(0deg)'; // Optional: Reset rotation if needed
+
+                          const spreadDelay = 300;
+                          setTimeout(() => {
+                            console.log("Starting spread animation."); // Used console.log
+                            let spreadAnimationsFinished = 0;
+
+                            selectedCards.forEach((card, index) => {
+                              // Current transform is from triangle class (e.g., translateY(-100px))
+                              // This transform is relative to the triangleContainer's center.
+                              const startTransformForSpread =
+                                window.getComputedStyle(card).transform;
+
+                              card.classList.remove(
+                                "final-card-in-triangle",
+                                `pos-${index}`
+                              );
+                              // No longer absolute, will be laid out by finalContainer's flex
+                              // We need to move it out of triangleContainer for proper flex layout in finalContainer
+                              currentFinalContainer.appendChild(card); // Move card to be a direct child of finalContainer
+
+                              card.style.position = "relative"; // For flex layout
+                              card.style.top = "auto";
+                              card.style.left = "auto";
+                              card.style.margin = "0 10px"; // Spacing for spread
+                              // Set its transform to what it was, so it doesn't jump before animating
+                              // This is tricky because its parent changed.
+                              // For simplicity, let's assume they animate from a common point (center of where triangle was)
+                              // Or, better, the animation starts from their current visual state.
+                              // The keyframes below will handle the transition.
+
+                              const cardWidth = 200; // Assuming card width
+                              const cardHeight = 300; // Assuming card height
+                              const spacing = 20;
+                              const totalWidth =
+                                selectedCards.length * cardWidth +
+                                (selectedCards.length - 1) * spacing;
+                              const totalHeight =
+                                selectedCards.length * cardHeight +
+                                (selectedCards.length - 1) * spacing;
+                              const startX = -totalWidth / 2 + cardWidth / 2;
+                              const targetX =
+                                startX + index * (cardWidth + spacing);
+
+                              card
+                                .animate(
+                                  [
+                                    // Start from current visual state (which was centered in triangle, then group rotated)
+                                    // Since it's now relative in finalContainer, its 'natural' position is based on flex.
+                                    // We need to make it appear from the center.
+                                    // The previous 'converge' animation ended with `scale(0.8) translateY(0px) rotateZ(0deg)`
+                                    // which means they are at the center of finalContainer.
+                                    // The triangle animation then moved them relative to triangleContainer's center.
+                                    // Let's make them animate from the center of finalContainer to their spread positions.
+                                    {
+                                      transform: `translate(${index * 10}px, ${
+                                        index * 10
+                                      }px) scale(0.8) rotateZ(${
+                                        index * 15
+                                      }deg)`,
+                                    }, // From center
+                                    {
+                                      transform: `translate(${targetX}px, 0px) scale(1.0) rotateZ(0deg)`,
+                                    },
+                                  ],
+                                  {
+                                    duration: 800,
+                                    easing: "cubic-bezier(0.34, 1.56, 0.64, 1)",
+                                    fill: "forwards",
+                                    delay: index * 100,
+                                  }
+                                )
+                                .finished.then(() => {
+                                  spreadAnimationsFinished++;
+                                  if (
+                                    spreadAnimationsFinished ===
+                                    selectedCards.length
+                                  ) {
+                                    console.log("All cards spread."); // Used console.log
+                                    if (
+                                      currentFinalContainer.contains(
+                                        triangleContainer
+                                      )
+                                    ) {
+                                      currentFinalContainer.removeChild(
+                                        triangleContainer
+                                      );
+                                    }
+                                    resolve();
+                                  }
+                                });
+                            });
+                          }, spreadDelay);
+                        },
+                        { once: true }
+                      );
+                    }, 50);
+                  }).then(() => {
+                    // This .then() is for AFTER triangle and spread are complete
+                    console.log("Cards arranged. Starting final reveal."); // Used console.log
+                    const finalRevealContainer = document.querySelector(
+                      ".final-cards-container"
+                    );
+                    if (finalRevealContainer) {
+                      // Ensure it exists
+                      finalRevealContainer.style.justifyContent =
+                        "space-evenly"; // Or 'center'
+                    }
+
+                    selectedCards.forEach((card, index) => {
+                      // Ensure card styles are appropriate for final reveal
+                      card.style.position = "relative"; // Should already be
+                      card.style.margin = "0 10px"; // Should already be
+                      // Transform should be what the spread animation left it at (fill: 'forwards')
+
+                      const randomCardIndex = Math.floor(
+                        Math.random() * tarotCardImages.length
+                      );
+                      const [tarotImageSrc, tarotCardName] =
+                        tarotCardImages[randomCardIndex];
+
+                      // Ensure userTarotReading is accessible
+                      if (
+                        typeof userTarotReading !== "undefined" &&
+                        userTarotReading.cards
+                      ) {
+                        userTarotReading.cards.push({
+                          position: index + 1,
+                          name: tarotCardName,
+                          cardPosition: card.dataset.cardPosition || "N/A",
+                        });
+                      } else {
+                        console.warn(
+                          "userTarotReading object not found or initialized correctly."
+                        );
+                      }
+
+                      card
+                        .animate(
+                          // Scale up for emphasis
+                          [
+                            {
+                              transform: card.style.transform,
+                              opacity: 1,
+                              boxShadow: card.style.boxShadow,
+                            }, // Current state from spread
+                            {
+                              transform: `translate(${
+                                card.style
+                                  .getPropertyValue("transform")
+                                  .includes("translateX")
+                                  ? card.style
+                                      .getPropertyValue("transform")
+                                      .split("translateX(")[1]
+                                      .split("px)")[0]
+                                  : "0"
+                              }px, 0px) scale(1.1)`, // Maintain X, scale
+                              opacity: 1,
+                              boxShadow:
+                                "0 15px 35px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 215, 0, 0.5)",
+                            },
+                          ],
+                          {
+                            duration: 800, // Slightly longer for a grander effect
+                            easing: "cubic-bezier(0.34, 1.56, 0.64, 1)",
+                            fill: "forwards",
+                            delay: 200 + index * 150, // Stagger
+                          }
+                        )
+                        .finished.then(() => {
+                          card.innerHTML = ""; // Clear previous content (like back pattern)
+
+                          const cardBack = document.createElement("div");
+                          cardBack.className = "card-face card-back";
+                          // Add back content (e.g., pattern)
+                          const pattern = document.createElement("div");
+                          pattern.className = "card-pattern";
+                          // (You had more detailed pattern code, restore if needed)
+                          const cardGrid = document.createElement("div");
+                          cardGrid.className = "card-grid";
+                          cardGrid.innerHTML = `<svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="40" cy="40" r="38" stroke="rgba(255, 215, 0, 0.2)" stroke-width="0.5" /><circle cx="40" cy="40" r="25" stroke="rgba(255, 215, 0, 0.2)" stroke-width="0.5" /><line x1="0" y1="40" x2="80" y2="40" stroke="rgba(255, 215, 0, 0.2)" stroke-width="0.5" /><line x1="40" y1="0" x2="40" y2="80" stroke="rgba(255, 215, 0, 0.2)" stroke-width="0.5" /></svg>`;
+                          pattern.appendChild(cardGrid);
+                          const symbols = ["☽", "☀", "★"];
+                          const symbol = document.createElement("div");
+                          symbol.style.cssText = `position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: rgba(255, 215, 0, 0.9); font-size: 40px; text-shadow: 0 0 15px rgba(255, 215, 0, 0.9);`;
+                          symbol.innerHTML = symbols[index % symbols.length];
+                          pattern.appendChild(symbol);
+                          cardBack.appendChild(pattern);
+
+                          const cardFront = document.createElement("div");
+                          cardFront.className = "card-face card-front";
+                          const tarotImage = document.createElement("img");
+                          tarotImage.src = tarotImageSrc;
+                          tarotImage.alt = tarotCardName;
+                          tarotImage.className = "tarot-image";
+                          tarotImage.title = tarotCardName;
+                          cardFront.appendChild(tarotImage);
+
+                          const cardNameDisplay = document.createElement("div");
+                          cardNameDisplay.style.cssText = `position: absolute; bottom: 10px; left: 0; width: 100%; text-align: center; color: white; font-size: 12px; font-weight: bold; text-shadow: 0 0 5px rgba(0,0,0,0.9), 0 0 10px rgba(255,215,0,0.8); padding: 3px; background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);`;
+                          cardNameDisplay.innerHTML = tarotCardName;
+                          cardFront.appendChild(cardNameDisplay);
+
+                          card.appendChild(cardBack);
+                          card.appendChild(cardFront);
+
+                          const glowingBorder = document.createElement("div");
+                          glowingBorder.style.cssText = `position: absolute; top: -3px; left: -3px; right: -3px; bottom: -3px; border-radius: 10px; box-shadow: 0 0 15px rgba(255, 215, 0, 0.7); pointer-events: none; z-index: 1;`;
+                          card.appendChild(glowingBorder);
+
+                          // Particle effect (optional, can be intensive)
+                          for (let p = 0; p < 8; p++) {
+                            // Reduced particles
+                            const particle = document.createElement("div");
+                            particle.style.cssText = `position: absolute; width: 4px; height: 4px; border-radius: 50%; background-color: rgba(255, 215, 0, 0.7); box-shadow: 0 0 6px rgba(255, 215, 0, 0.9);`;
+                            const angle = (p / 8) * Math.PI * 2;
+                            const particleRadius = 60;
+                            const x = Math.cos(angle) * particleRadius;
+                            const y = Math.sin(angle) * particleRadius;
+                            particle.style.top = `calc(50% + ${y}px - 2px)`;
+                            particle.style.left = `calc(50% + ${x}px - 2px)`;
+                            particle.style.opacity = "0";
+                            particle.style.animation = `sparkle ${
+                              1 + Math.random()
+                            }s infinite ${Math.random()}s`;
+                            card.appendChild(particle);
+                            setTimeout(() => {
+                              particle.style.opacity = "0.8";
+                            }, 200 + p * 50);
+                          }
+                          card.classList.add("revealed-card");
+
+                          setTimeout(() => {
+                            const flashEffect = document.createElement("div");
+                            flashEffect.style.cssText = `position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255, 255, 255, 0.9); border-radius: 8px; opacity: 0; pointer-events: none; z-index: 2;`;
+                            card.appendChild(flashEffect);
+                            flashEffect.animate(
+                              [
+                                { opacity: 0 },
+                                { opacity: 0.9, offset: 0.1 },
+                                { opacity: 0, offset: 0.5 },
+                              ],
+                              {
+                                duration: 800,
+                                easing: "cubic-bezier(0.11, 0, 0.5, 0)",
+                                fill: "forwards",
+                              }
+                            );
+
+                            setTimeout(() => {
+                              card.classList.add("card-flipped");
+                              // 3D tilt effect
+                              card.addEventListener("mousemove", function (e) {
+                                const rect = card.getBoundingClientRect();
+                                const x_tilt =
+                                  e.clientX - rect.left - rect.width / 2;
+                                const y_tilt =
+                                  e.clientY - rect.top - rect.height / 2;
+                                const rotateX =
+                                  (-y_tilt / (rect.height / 2)) * 7; // Max 7deg
+                                const rotateY = (x_tilt / (rect.width / 2)) * 7; // Max 7deg
+                                // Apply to the current scale
+                                const currentScaleMatch =
+                                  card.style.transform.match(
+                                    /scale\(([^)]+)\)/
+                                  );
+                                const currentScale = currentScaleMatch
+                                  ? currentScaleMatch[1]
+                                  : "1.1"; // Default to 1.1 if not found
+                                card.style.transform = `scale(${currentScale}) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                              });
+                              card.addEventListener("mouseleave", function () {
+                                const currentScaleMatch =
+                                  card.style.transform.match(
+                                    /scale\(([^)]+)\)/
+                                  );
+                                const currentScale = currentScaleMatch
+                                  ? currentScaleMatch[1]
+                                  : "1.1";
+                                card.style.transform = `scale(${currentScale}) rotateX(0deg) rotateY(0deg)`;
+                              });
+                            }, 200); // Delay flip
+                          }, 700 + index * 200); // Stagger flash/flip
+                        });
+                    });
+                    // DO NOT ADD THE DUPLICATED REVEAL LOGIC HERE
+                  }); // End of .then() after triangle & spread
+                }) // End of .then() after convergeAnimations
+                .catch((error) =>
+                  console.error("Error in animation sequence:", error)
+                );
+            }) // End of .then() after unselectedAnimations
+            .catch((error) =>
+              console.error("Error hiding unselected cards:", error)
+            );
+        }
+
+        startButton.addEventListener("click", function () {
+          this.style.display = "none";
+
+          // Hide the intro card container when the start button is clicked
+          if (introCardContainer) {
+            introCardContainer.style.display = "none";
+          }
+
+          // Instructions text
+          const instructions = document.createElement("div");
+          instructions.id = "instructions-text"; // Add an ID for easy reference
+          instructions.style.color = "white";
+          instructions.style.textAlign = "center";
+          instructions.style.marginTop = "15px";
+          instructions.style.fontSize = "18px";
+          instructions.style.fontWeight = "bold";
+          instructions.style.textShadow = "0 0 10px rgba(0, 0, 0, 0.8)";
+          instructions.style.letterSpacing = "1px";
+          instructions.style.padding = "10px";
+          instructions.style.animation = "fadeUpIn 1s ease-out forwards";
+          instructions.innerHTML = "Choose three cards for your reading";
+          document
+            .querySelector(".tarot-area")
+            .insertBefore(instructions, startButton);
+
+          // Animate each card one by one
+          const cards = document.querySelectorAll(".card");
+          cards.forEach((card, index) => {
+            setTimeout(() => {
+              // Make card visible
+              card.classList.add("visible");
+
+              // Move to final position with slight bounce
+              const finalX = card.dataset.finalX;
+              const finalY = card.dataset.finalY;
+              const finalRotation = card.dataset.finalRotation;
+
+              // Create a more interesting animation
+              card.animate(
+                [
+                  // Start offscreen top-left
+                  {
+                    transform: `translate(-300px, -200px) rotate(0deg)`,
+                    opacity: 0,
+                  },
+                  // Approaching position
+                  {
+                    transform: `translate(calc(${finalX} - 20px), calc(${finalY} - 10px)) rotate(calc(${finalRotation} - 5deg))`,
+                    opacity: 0.7,
+                    offset: 0.7,
+                  },
+                  // Slight overshoot
+                  {
+                    transform: `translate(calc(${finalX} + 5px), calc(${finalY} + 3px)) rotate(calc(${finalRotation} + 2deg))`,
+                    opacity: 1,
+                    offset: 0.9,
+                  },
+                  // Final position
+                  {
+                    transform: `translate(${finalX}, ${finalY}) rotate(${finalRotation})`,
+                    opacity: 1,
+                  },
+                ],
+                {
+                  duration: 700,
+                  easing: "cubic-bezier(0.2, 0.85, 0.4, 1.2)",
+                  fill: "forwards",
+                }
+              );
+            }, index * 100); // Staggered timing
+          });
+        });
+
+        // Initialize the tarot arc
+        createTarotArc();
+
+        // Form submission handlers
+        submit1.addEventListener("click", function () {
+          // Collect first form data
+          userTarotReading.name = nameInput.value;
+          userTarotReading.interest =
+            document.querySelector('input[name="mind"]:checked')?.value ||
+            "general future";
+
+          formState.form1Submitted = true;
+          formState.currentlyFillingForm = false; // Allow picking next card
+          form1.style.display = "none";
+
+          // Check if a second card is already drawn and show form 2 if it is
+          const drawnCards = document.querySelectorAll(".card.drawn");
+          if (drawnCards.length >= 2) {
+            form2.style.display = "block";
+            formState.currentlyFillingForm = true; // Prevent picking more cards
+          }
+        });
+
+        submit2.addEventListener("click", function () {
+          // Collect second form data
+          userTarotReading.dob = dobInput.value;
+
+          formState.form2Submitted = true;
+          formState.currentlyFillingForm = false; // Allow picking next card
+          form2.style.display = "none";
+
+          // Check if a third card is already drawn and show form 3 if it is
+          const drawnCards = document.querySelectorAll(".card.drawn");
+          if (drawnCards.length >= 3) {
+            form3.style.display = "block";
+            formState.currentlyFillingForm = true; // Prevent picking more cards
+          }
+        });
+
+        submit3.addEventListener("click", function () {
+          // Collect third form data
+          userTarotReading.email = emailInput.value;
+
+          formState.form3Submitted = true;
+          form3.style.display = "none";
+
+          // Hide instructions text
+          const instructionsText = document.getElementById("instructions-text");
+          if (instructionsText) {
+            instructionsText.style.display = "none";
+          }
+
+          // Give a small delay before starting the animation
+          setTimeout(function () {
+            // Start the final reveal animation
+            performFinalReveal();
+            console.log("Final reveal animation triggered");
+          }, 500);
+        });
+
+        // Form validation logic
+        const nameInput = document.getElementById("name");
+        const mindOptions = document.querySelectorAll('input[name="mind"]');
+        const dobInput = document.getElementById("dob");
+        const emailInput = document.getElementById("email");
+
+        // Form 1 validation
+        function validateForm1() {
+          const nameValid = nameInput.value.trim() !== "";
+          const mindSelected = Array.from(mindOptions).some(
+            (option) => option.checked
+          );
+          submit1.disabled = !(nameValid && mindSelected);
+          console.log("Form 1 validation:", {
+            nameValid,
+            mindSelected,
+            buttonDisabled: submit1.disabled,
+          });
+        }
+
+        nameInput.addEventListener("input", validateForm1);
+        mindOptions.forEach((option) => {
+          option.addEventListener("change", validateForm1);
+        });
+
+        // Form 2 validation
+        function validateForm2() {
+          submit2.disabled = !dobInput.value;
+          console.log("Form 2 validation:", {
+            dobValid: !!dobInput.value,
+            buttonDisabled: submit2.disabled,
+          });
+        }
+
+        dobInput.addEventListener("input", validateForm2);
+
+        // Form 3 validation
+        function validateForm3() {
+          const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          const emailValid = emailPattern.test(emailInput.value);
+          submit3.disabled = !emailValid;
+          console.log("Form 3 validation:", {
+            emailValid,
+            buttonDisabled: submit3.disabled,
+          });
+        }
+
+        emailInput.addEventListener("input", validateForm3);
+
+        // Force validate on page load to avoid issues
+        window.addEventListener("load", function () {
+          // Force form buttons to be initially disabled
+          submit1.disabled = true;
+          submit2.disabled = true;
+          submit3.disabled = true;
+        });
+
+        // Store tarot card data for final results
+        let userTarotReading = {
+          name: "",
+          interest: "",
+          dob: "",
+          email: "",
+          cards: [],
+        };
+
+        // Add tarot card images array
+        const tarotCardImages = [
+          ["https://www.trustedtarot.com/img/cards/the-fool.png", "The Fool"],
+          [
+            "https://www.trustedtarot.com/img/cards/the-magician.png",
+            "The Magician",
+          ],
+          [
+            "https://www.trustedtarot.com/img/cards/the-high-priestess.png",
+            "The High Priestess",
+          ],
+          [
+            "https://www.trustedtarot.com/img/cards/the-empress.png",
+            "The Empress",
+          ],
+          [
+            "https://www.trustedtarot.com/img/cards/the-emperor.png",
+            "The Emperor",
+          ],
+          [
+            "https://www.trustedtarot.com/img/cards/the-hierophant.png",
+            "The Hierophant",
+          ],
+          [
+            "https://www.trustedtarot.com/img/cards/the-lovers.png",
+            "The Lovers",
+          ],
+          [
+            "https://www.trustedtarot.com/img/cards/the-chariot.png",
+            "The Chariot",
+          ],
+          ["https://www.trustedtarot.com/img/cards/strength.png", "Strength"],
+          [
+            "https://www.trustedtarot.com/img/cards/the-hermit.png",
+            "The Hermit",
+          ],
+          [
+            "https://www.trustedtarot.com/img/cards/wheel-of-fortune.png",
+            "Wheel of Fortune",
+          ],
+          ["https://www.trustedtarot.com/img/cards/justice.png", "Justice"],
+          [
+            "https://www.trustedtarot.com/img/cards/the-hanged-man.png",
+            "The Hanged Man",
+          ],
+          ["https://www.trustedtarot.com/img/cards/death.png", "Death"],
+          [
+            "https://www.trustedtarot.com/img/cards/temperance.png",
+            "Temperance",
+          ],
+          ["https://www.trustedtarot.com/img/cards/the-devil.png", "The Devil"],
+          ["https://www.trustedtarot.com/img/cards/the-tower.png", "The Tower"],
+          ["https://www.trustedtarot.com/img/cards/the-star.png", "The Star"],
+          ["https://www.trustedtarot.com/img/cards/the-moon.png", "The Moon"],
+          ["https://www.trustedtarot.com/img/cards/the-sun.png", "The Sun"],
+          ["https://www.trustedtarot.com/img/cards/judgement.png", "Judgement"],
+          ["https://www.trustedtarot.com/img/cards/the-world.png", "The World"],
+        ];
+      });
+    </script>
+    <!-- <script src="spiral-helper.js"></script> -->
+    <!-- <script src="triangle-helper.js"></script> -->
+
+    <script>
+  function sendFormData() {
+    const data = {
+      name: document.getElementById('name').value,
+      topic: document.querySelector('input[name="mind"]:checked')?.value || '',
+      dob: document.getElementById('dob').value,
+      email: document.getElementById('email').value,
+    };
+
+    fetch("/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(res => {
+      if (res.status === 'success') alert("Submitted!");
+    });
+  }
+
+  document.getElementById('submit3').addEventListener('click', sendFormData);
+</script>
+
+  </body>
+</html>
