@@ -2092,39 +2092,31 @@ const angle = Math.atan(slope / 550) * (180 / Math.PI);
                               }
                             );
 
-                            setTimeout(() => {
-                              card.classList.add("card-flipped");
-                              // 3D tilt effect
-                              card.addEventListener("mousemove", function (e) {
-                                const rect = card.getBoundingClientRect();
-                                const x_tilt =
-                                  e.clientX - rect.left - rect.width / 2;
-                                const y_tilt =
-                                  e.clientY - rect.top - rect.height / 2;
-                                const rotateX =
-                                  (-y_tilt / (rect.height / 2)) * 7; // Max 7deg
-                                const rotateY = (x_tilt / (rect.width / 2)) * 7; // Max 7deg
-                                // Apply to the current scale
-                                const currentScaleMatch =
-                                  card.style.transform.match(
-                                    /scale\(([^)]+)\)/
-                                  );
-                                const currentScale = currentScaleMatch
-                                  ? currentScaleMatch[1]
-                                  : "1.1"; // Default to 1.1 if not found
-                                card.style.transform = `scale(${currentScale}) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-                              });
-                              card.addEventListener("mouseleave", function () {
-                                const currentScaleMatch =
-                                  card.style.transform.match(
-                                    /scale\(([^)]+)\)/
-                                  );
-                                const currentScale = currentScaleMatch
-                                  ? currentScaleMatch[1]
-                                  : "1.1";
-                                card.style.transform = `scale(${currentScale}) rotateX(0deg) rotateY(0deg)`;
-                              });
-                            }, 200); // Delay flip
+                            // Manual flip on click
+card.addEventListener("click", () => {
+  if (!card.classList.contains("card-flipped")) {
+    card.classList.add("card-flipped");
+  }
+});
+
+// 3D tilt effect (keep outside setTimeout)
+card.addEventListener("mousemove", function (e) {
+  const rect = card.getBoundingClientRect();
+  const x_tilt = e.clientX - rect.left - rect.width / 2;
+  const y_tilt = e.clientY - rect.top - rect.height / 2;
+  const rotateX = (-y_tilt / (rect.height / 2)) * 7;
+  const rotateY = (x_tilt / (rect.width / 2)) * 7;
+  const currentScaleMatch = card.style.transform.match(/scale\(([^)]+)\)/);
+  const currentScale = currentScaleMatch ? currentScaleMatch[1] : "1.1";
+  card.style.transform = `scale(${currentScale}) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+});
+
+card.addEventListener("mouseleave", function () {
+  const currentScaleMatch = card.style.transform.match(/scale\(([^)]+)\)/);
+  const currentScale = currentScaleMatch ? currentScaleMatch[1] : "1.1";
+  card.style.transform = `scale(${currentScale}) rotateX(0deg) rotateY(0deg)`;
+});
+ // Delay flip
                           }, 700 + index * 200); // Stagger flash/flip
                         });
                     });
